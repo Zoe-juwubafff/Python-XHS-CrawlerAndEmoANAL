@@ -18,14 +18,14 @@ headers = {
 
 # 定义XHS爬虫的cookie，根据XHS-PC端进行设置
 cookies = {
-    "sec_poison_id": "96098c84-5b7f-4b80-ad92-ef1e183a9498",
-    "gid": "yYi8yyYKj4yKyYi8yyY2dIuSijqCEuSjhq90xAd2dUY67l28qV4jJ1888q8jK8W8W8JWW0WW",
-    "a1": "18f01185ef93xwzc9v3ta5ep8mu3j4921nholzcqe50000309607",
-    "websectiga": "8886be45f388a1ee7bf611a69f3e174cae48f1ea02c0f8ec3256031b8be9c7ee",
-    "webId": "818003111f2a6ed3343577cbd9366cc6",
-    "web_session": "0400697f301a17ed4463af8074344bc15c8775",
+    "sec_poison_id": "XXXX",
+    "gid": "XXXXX",
+    "a1": "XXXXX",
+    "websectiga": "XXXXX",
+    "webId": "XXXXX",
+    "web_session": "XXXXX",
     "xsecappid": "xhs-pc-web",
-    "webBuild": "4.15.2"
+    "webBuild": "XXXX"
 }
 
 js = execjs.compile(open(r'info.js', 'r', encoding='utf-8').read())
