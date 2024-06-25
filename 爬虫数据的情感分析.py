@@ -84,8 +84,8 @@ def get_token():
     url = "https://aip.baidubce.com/oauth/2.0/token"
     data = {
         'grant_type': 'client_credentials',
-        'client_id': 'VuzeNQgoVOCFvuWECRqdIhqf',  # API Key
-        'client_secret': 'X6I852BGpZZwe50QY9Mvtr3kHVPdbbBD'  # Secret Key
+        'client_id': 'your_API Key',  # API Key
+        'client_secret': 'your_Secret Key'  # Secret Key
     }
     response = requests.post(url, data=data)
     return response.json()['access_token']
@@ -179,10 +179,10 @@ def save_negative_info():
 
 # 新增函数，用于发送邮件
 def send_email(subject, body, to, attachment):
-    from_addr = "450971619@qq.com"
-    password = "fvxtvjfzufkebjaf"
-    smtp_server = "smtp.qq.com"
-    smtp_port = 465
+    from_addr = "XXX@example.com"
+    password = "password"
+    smtp_server = "smtp.example.com"
+    smtp_port = 465 # 根据不同邮箱设置端口
 
     # 创建邮件对象
     msg = MIMEMultipart()
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     # 发送邮件
     subject = "负面信息收集报告"
     body = "附件是最新的负面信息收集报告，请查收。"
-    to = "juwubafff@163.com"
+    to = "XXX@example.com" # 你要发送到的邮箱
     attachment = '负面信息收集.csv'
     send_email(subject, body, to, attachment)
 
