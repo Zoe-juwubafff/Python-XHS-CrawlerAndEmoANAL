@@ -2,18 +2,18 @@
 ## 上手指南：以下指南将帮助你在本地机器上安装和运行该项目，进行开发和测试。关于如何将该项目部署到在线环境，请参考部署小节
 ## 环境配置步骤----安装NodeJS----配置Python解释器（3.8）----安装所需的库
 ### 1.NodeJS
-    NodeJS下载地址：https://nodejs.org/zh-cn/download/ （根据自己的计算机系统、配置选择对应的版本）
-    下载NodeJS后按照指引安装即可，安装完成后记得配置系统环境变量
-    我这里使用pycharm专业版（必须专业版）配置nodejs环境
-    file-setting-plugin-marketplace
-    搜索nodejs，我的显示已经安装过
-    如果没有安装过，直接点击install即可
-    ![image](https://github.com/Zoe-juwubafff/BAES-Python-XHS-CrawlerAndEmoANAL/assets/90123940/1dc81454-bdd3-40d4-8704-0b8b67b498f8)
-    接着点击如下图框选的内容
-    ![image](https://github.com/Zoe-juwubafff/BAES-Python-XHS-CrawlerAndEmoANAL/assets/90123940/b9ea2f44-7488-48c6-bb3e-631f15fedc97)
-    选择本地安装nodejs的路径
+### NodeJS下载地址：https://nodejs.org/zh-cn/download/ （根据自己的计算机系统、配置选择对应的版本）
+### 下载NodeJS后按照指引安装即可，安装完成后记得配置系统环境变量
+### 我这里使用pycharm专业版（必须专业版）配置nodejs环境
+### file-setting-plugin-marketplace
+### 搜索nodejs，我的显示已经安装过
+### 如果没有安装过，直接点击install即可
+### ![image](https://github.com/Zoe-juwubafff/BAES-Python-XHS-CrawlerAndEmoANAL/assets/90123940/1dc81454-bdd3-40d4-8704-0b8b67b498f8)
+### 接着点击如下图框选的内容
+### ![image](https://github.com/Zoe-juwubafff/BAES-Python-XHS-CrawlerAndEmoANAL/assets/90123940/b9ea2f44-7488-48c6-bb3e-631f15fedc97)
+### 选择本地安装nodejs的路径
     ![image](https://github.com/Zoe-juwubafff/BAES-Python-XHS-CrawlerAndEmoANAL/assets/90123940/b62c6bd4-4dec-4f3a-ba91-50076cf97724)
-    至此，nodejs配置完成
+### 至此，nodejs配置完成
 ### 2.Python解释器要求
 #### 本人测试使用的为3.8版本无任何问题，测试过3.11会有一些小问题，建议版本为3.8~3.9
 ### 3.运行所需的库
