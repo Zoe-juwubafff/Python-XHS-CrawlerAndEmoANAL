@@ -1,0 +1,80 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="DuplicatedCode" enabled="false" level="WEAK WARNING" enabled_by_default="false">
+      <Languages>
+        <language minSize="408" name="Python" />
+      </Languages>
+    </inspection_tool>
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="11">
+            <item index="0" class="java.lang.String" itemvalue="tqdm" />
+            <item index="1" class="java.lang.String" itemvalue="protobuf" />
+            <item index="2" class="java.lang.String" itemvalue="six" />
+            <item index="3" class="java.lang.String" itemvalue="imageio" />
+            <item index="4" class="java.lang.String" itemvalue="opencv-python" />
+            <item index="5" class="java.lang.String" itemvalue="pkg-resources" />
+            <item index="6" class="java.lang.String" itemvalue="tensorboardX" />
+            <item index="7" class="java.lang.String" itemvalue="torch" />
+            <item index="8" class="java.lang.String" itemvalue="numpy" />
+            <item index="9" class="java.lang.String" itemvalue="torchvision" />
+            <item index="10" class="java.lang.String" itemvalue="Pillow" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E128" />
+          <option value="E501" />
+          <option value="E402" />
+          <option value="E114" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N802" />
+          <option value="N803" />
+          <option value="N806" />
+          <option value="N812" />
+        </list>
+      </option>
+      <option name="ignoreOverriddenFunctions" value="false" />
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="bool.type" />
+          <option value="torch.utils.data" />
+          <option value="typing.Iterator.next" />
+          <option value="bool.sum" />
+          <option value="PIL.Image.Resampling" />
+          <option value="object.transform" />
+          <option value="object.predict" />
+          <option value="cv2.cvtColor" />
+          <option value="cv2.COLOR_BGR2GRAY" />
+          <option value="object.labels_" />
+          <option value="object.cluster_centers_" />
+          <option value="numpy.core._multiarray_umath.ndarray.iloc" />
+          <option value="keras.applications.vgg16" />
+          <option value="keras.applications.vgg19" />
+          <option value="keras.applications.resnet" />
+          <option value="keras.applications.mobilenet" />
+          <option value="keras.applications.mobilenet_v2" />
+          <option value="keras.applications.densenet" />
+          <option value="keras.applications.xception" />
+          <option value="keras.applications.inception_v3" />
+          <option value="keras.applications.nasnet" />
+          <option value="keras.metrics" />
+          <option value="程序.expression_entry" />
+          <option value="程序.result_label" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
