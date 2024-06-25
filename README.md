@@ -14,8 +14,10 @@
 ### 选择本地安装nodejs的路径
 ### ![image](https://github.com/Zoe-juwubafff/BAES-Python-XHS-CrawlerAndEmoANAL/assets/90123940/b62c6bd4-4dec-4f3a-ba91-50076cf97724)
 ### 至此，nodejs配置完成
+
 ### 2.Python解释器要求
 #### 本人测试使用的为3.8版本无任何问题，测试过3.11会有一些小问题，建议版本为3.8~3.9
+
 ### 3.运行所需的库
     pip install -r requirements.txt
 ##主要代码说明
