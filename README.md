@@ -25,6 +25,8 @@
 爬虫数据的情感分析.py----根据爬虫所得到的数据对此关键词内容的情绪判断并反馈
 ## 运行步骤
 小红书关键词爬虫.py————>爬虫数据的情感分析.py
+## 重点（windows电脑请忽略）：mac电脑绘制词云图的时候，数据分析代码中，注释或者删除上面一行代码，解除注释下面一行代码（删除前面的 ＃ 解除注释），如下图：![image](https://github.com/Zoe-juwubafff/BAES-Python-XHS-CrawlerAndEmoANAL/assets/90123940/6438b4a0-9fbb-4967-8283-6eb3be548fea)
+
 # Contributing
 
 When contributing to this repository, please first discuss the change you wish to make via issue,
