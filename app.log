@@ -1,0 +1,33 @@
+jieba - DEBUG - Building prefix dict from the default dictionary ...
+jieba - DEBUG - Loading model from cache C:\Users\ZoeShum\AppData\Local\Temp\jieba.cache
+jieba - DEBUG - Loading model cost 0.540 seconds.
+jieba - DEBUG - Prefix dict has been built successfully.
+root - INFO - Analyzing text: 听朋友说直美团停亲测效疯狂喷实行卸载重装...
+root - INFO - Response for text: 听朋友说直美团停亲测效疯狂喷实行卸载重装
+{
+  "text": "听朋友说直美团停亲测效疯狂喷实行卸载重装",
+  "items": [
+    {
+      "confidence": 0.890772,
+      "negative_prob": 0.494539,
+      "positive_prob": 0.505461,
+      "sentiment": 1
+    }
+  ],
+  "log_id": 1807069316122247807
+}
+root - INFO - Analyzing text: 家艾特美团真券膨胀惊呆数杀熟神券元贵平转饿美团数杀熟神券元元...
+root - INFO - Response for text: 家艾特美团真券膨胀惊呆数杀熟神券元贵平转饿美团数杀熟神券元元贵平转饿饿美团太差劲外卖美团员真太差劲饿真想美团卸想美团点外卖昨天饿开包年员晦气死美团美团员真太差劲饿真想美团卸想美团
+{
+  "text": "家艾特美团真券膨胀惊呆数杀熟神券元贵平转饿美团数杀熟神券元元贵平转饿饿美团太差劲外卖美团员真太差劲饿真想美团卸想美团点外卖昨天饿开包年员晦气死美团美团员真太差劲饿真想美团卸想美团",
+  "items": [
+    {
+      "confidence": 0.999911,
+      "negative_prob": 0.99996,
+      "positive_prob": 4.01248e-05,
+      "sentiment": 0
+    }
+  ],
+  "log_id": 1807069324316526548
+}
+root - INFO - Email sent successfully!
