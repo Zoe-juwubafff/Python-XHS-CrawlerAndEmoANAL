@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import pandas as pd
 import jieba
@@ -12,15 +13,33 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+import configparser
+import logging
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 # 设置matplotlib的字体，以便可以显示中文
 plt.rcParams['font.sans-serif'] = ['SimHei', 'Songti SC', 'STFangsong']
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
+# 读取配置文件
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+# 获取百度API和邮箱相关配置
+client_id = config['baidu_api']['client_id']
+client_secret = config['baidu_api']['client_secret']
+from_addr = config['email']['from_addr']
+password = config['email']['password']
+smtp_server = config['email']['smtp_server']
+smtp_port = config['email']['smtp_port']
+
 # 读取停用词文件
 stopwords_file = 'stopwords.txt'
 with open(stopwords_file, "r", encoding='utf-8') as words:
     stopwords = [i.strip() for i in words]
+
+# 设置日志记录
+logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # 定义一个函数，用于对文本进行分词
 def segment_text(texts):
@@ -80,17 +99,20 @@ def plot_word_frequency(text):
     plt.show()
 
 # 定义一个函数，用于获取百度API的token
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def get_token():
     url = "https://aip.baidubce.com/oauth/2.0/token"
     data = {
         'grant_type': 'client_credentials',
-        'client_id': 'your_API Key',  # API Key
-        'client_secret': 'your_Secret Key'  # Secret Key
+        'client_id': client_id,  # 从配置文件读取
+        'client_secret': client_secret  # 从配置文件读取
     }
     response = requests.post(url, data=data)
+    response.raise_for_status()
     return response.json()['access_token']
 
 # 定义一个函数，用于获取文本的情感
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def get_emotion(data, token):
     url = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/sentiment_classify?charset=UTF-8&access_token={}'.format(token)
     headers = {'Content-Type': 'application/json'}
@@ -99,7 +121,7 @@ def get_emotion(data, token):
         response = requests.post(url, headers=headers, data=json.dumps(data))
         response.raise_for_status()
         result = response.json()
-        print(f"Response for text: {data['text']}\n{json.dumps(result, ensure_ascii=False, indent=2)}")
+        logging.info(f"Response for text: {data['text']}\n{json.dumps(result, ensure_ascii=False, indent=2)}")
         if result is not None and 'items' in result:
             item = result['items'][0]
             sentiment = item['sentiment']
@@ -108,10 +130,10 @@ def get_emotion(data, token):
             positive_prob = item.get('positive_prob', None)
             return sentiment, confidence, negative_prob, positive_prob
         else:
-            print("No items in result")
+            logging.warning("No items in result")
             return None, None, None, None
     except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+        logging.error(f"Request failed: {e}")
         return None, None, None, None
 
 # 定义一个函数，用于分析CSV文件中的数据
@@ -119,7 +141,7 @@ def analyze_csv(data, token, extra_column, keywords_column):
     sentiments = {0: 0, 1: 0, 2: 0}
     results = []
     for i, text in enumerate(data):
-        print(f"Analyzing text: {text[:30]}...")  # 打印前30个字符以了解处理进度
+        logging.info(f"Analyzing text: {text[:30]}...")  # 打印前30个字符以了解处理进度
         time.sleep(2)
         sentiment, confidence, negative_prob, positive_prob = get_emotion(text, token)
         if sentiment is not None:
@@ -134,7 +156,7 @@ def analyze_csv(data, token, extra_column, keywords_column):
                 '关键词': keywords_column[i]  # 添加第13列内容到结果中
             })
         else:
-            print(f"Failed to analyze text: {text[:30]}...")
+            logging.warning(f"Failed to analyze text: {text[:30]}...")
     results_df = pd.DataFrame(results)
     results_df.to_csv('情感分析结果.csv', index=False, encoding='utf-8-sig')
     return sentiments
@@ -176,14 +198,9 @@ def save_negative_info():
     negative_info_df = results_df[results_df['情感倾向'] == 0]  # 判断情感列的内容是否为0
     negative_info_df.to_csv('负面信息收集.csv', index=False, encoding='utf-8-sig')
 
-
 # 新增函数，用于发送邮件
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def send_email(subject, body, to, attachment):
-    from_addr = "XXX@example.com"
-    password = "password"
-    smtp_server = "smtp.example.com"
-    smtp_port = 465 # 根据不同邮箱设置端口
-
     # 创建邮件对象
     msg = MIMEMultipart()
     msg['From'] = from_addr
@@ -208,9 +225,10 @@ def send_email(subject, body, to, attachment):
         server.login(from_addr, password)
         server.send_message(msg)
         server.quit()
-        print("Email sent successfully!")
+        logging.info("Email sent successfully!")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        logging.error(f"Failed to send email: {e}")
+        raise e  # 重新引发异常，以便重试机制捕获
 
 # 主程序
 if __name__ == "__main__":
@@ -232,7 +250,12 @@ if __name__ == "__main__":
     count.sum(axis=0).plot(kind='bar')  # 绘制条形图
 
     # 情感分析
-    token = get_token()
+    try:
+        token = get_token()
+    except Exception as e:
+        logging.error(f"Failed to get token: {e}")
+        raise SystemExit("Failed to get token, exiting.")
+
     extra_column = data.iloc[:, 1].tolist()  # 获取第二列内容
     keywords_column = data.iloc[:, 12].tolist()  # 获取第十三列内容
     sentiments = analyze_csv(cleaned_content, token, extra_column, keywords_column)
@@ -245,7 +268,6 @@ if __name__ == "__main__":
     # 发送邮件
     subject = "负面信息收集报告"
     body = "附件是最新的负面信息收集报告，请查收。"
-    to = "XXX@example.com" # 你要发送到的邮箱
+    to = "juwubafff@163.com"
     attachment = '负面信息收集.csv'
     send_email(subject, body, to, attachment)
-
