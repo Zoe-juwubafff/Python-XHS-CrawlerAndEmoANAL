@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
 import re
 import time
 import requests
 import execjs
 import json
 import csv
+from datetime import datetime, timedelta
+import logging
+
+# 配置日志记录
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # 定义一个请求头
 headers = {
@@ -18,14 +24,16 @@ headers = {
 
 # 定义XHS爬虫的cookie，根据XHS-PC端进行设置
 cookies = {
-    "sec_poison_id": "XXXX",
-    "gid": "XXXXX",
-    "a1": "XXXXX",
-    "websectiga": "XXXXX",
-    "webId": "XXXXX",
-    "web_session": "XXXXX",
-    "xsecappid": "xhs-pc-web",
-    "webBuild": "XXXX"
+            'web_session': 'XXXXX',
+            'sec_poison_id': 'XXXXX',
+            'a1': 'XXXXX',
+            'gid': 'XXXXX',
+            'webBuild': 'XXXXX',
+            'xsecappid': 'xhs-pc-web',
+            'websectiga': 'XXXXX',
+            'webId': 'XXXXX',
+            'abRequestId': 'XXXXX',
+            'acw_tc': 'XXXXX'
 }
 
 js = execjs.compile(open(r'info.js', 'r', encoding='utf-8').read())
@@ -39,11 +47,13 @@ f = open(f"话题笔记数据.csv", "w", encoding="utf-8-sig", newline="")
 writer = csv.DictWriter(f, header)
 writer.writeheader()
 
+
 # 时间戳转换成日期
 def get_time(ctime):
     timeArray = time.localtime(int(ctime / 1000))
     otherStyleTime = time.strftime("%Y.%m.%d", timeArray)
     return str(otherStyleTime)
+
 
 # 保存笔记数据
 def save_data(note_data, note_id, keyword):
@@ -71,24 +81,24 @@ def save_data(note_data, note_id, keyword):
     global note_count
     note_count += 1
 
-    print(f"当前笔记数量: {note_count}\n",
-          f"笔记标题：{data_dict['笔记标题']}\n",
-          f"笔记链接：{data_dict['笔记链接']}\n",
-          f"用户ID：{data_dict['用户ID']}\n",
-          f"用户名：{data_dict['用户名']}\n",
-          f"头像链接：{data_dict['头像链接']}\n",
-          f"IP属地：{data_dict['IP属地']}\n",
-          f"笔记发布时间：{data_dict['笔记发布时间']}\n",
-          f"笔记收藏数量：{data_dict['笔记收藏数量']}\n",
-          f"笔记评论数量：{data_dict['笔记评论数量']}\n",
-          f"笔记点赞数量：{data_dict['笔记点赞数量']}\n",
-          f"笔记转发数量：{data_dict['笔记转发数量']}\n",
-          f"笔记内容：{data_dict['笔记内容']}\n",
-          f"关键词：{data_dict['关键词']}\n"
-          )
+    logging.info(f"当前笔记数量: {note_count}\n"
+                 f"笔记标题：{data_dict['笔记标题']}\n"
+                 f"笔记链接：{data_dict['笔记链接']}\n"
+                 f"用户ID：{data_dict['用户ID']}\n"
+                 f"用户名：{data_dict['用户名']}\n"
+                 f"头像链接：{data_dict['头像链接']}\n"
+                 f"IP属地：{data_dict['IP属地']}\n"
+                 f"笔记发布时间：{data_dict['笔记发布时间']}\n"
+                 f"笔记收藏数量：{data_dict['笔记收藏数量']}\n"
+                 f"笔记评论数量：{data_dict['笔记评论数量']}\n"
+                 f"笔记点赞数量：{data_dict['笔记点赞数量']}\n"
+                 f"笔记转发数量：{data_dict['笔记转发数量']}\n"
+                 f"笔记内容：{data_dict['笔记内容']}\n"
+                 f"关键词：{data_dict['关键词']}\n")
     writer.writerow(data_dict)
 
-def get_note_info(note_id, keyword):
+
+def get_note_info(note_id, keyword, start_date, end_date):
     note_url = 'https://edith.xiaohongshu.com/api/sns/web/v1/feed'
 
     data = {
@@ -103,16 +113,33 @@ def get_note_info(note_id, keyword):
     ret = js.call('get_xs', '/api/sns/web/v1/feed', data, cookies['a1'])
     headers['x-s'], headers['x-t'] = ret['X-s'], str(ret['X-t'])
     response = requests.post(note_url, headers=headers, cookies=cookies, data=data)
+
+    if response.status_code != 200:
+        logging.error(f'获取笔记 {note_id} 的信息时出错，状态码：{response.status_code}')
+        return
+
     json_data = response.json()
+    logging.debug(f'笔记 {note_id} 的数据：{json_data}')
 
     try:
         note_data = json_data['data']['items'][0]
-    except:
-        print(f'笔记 {note_id} 不允许查看')
+    except Exception as e:
+        logging.error(f'解析笔记 {note_id} 的数据时出错：{e}')
+        logging.info(f'笔记 {note_id} 不允许查看或无数据')
         return
-    save_data(note_data, note_id, keyword)
 
-def keyword_search(keyword):
+    # 获取笔记发布时间
+    note_time = int(note_data['note_card']['time'] / 1000)
+    note_date = datetime.fromtimestamp(note_time)
+
+    # 判断笔记发布时间是否在指定日期范围内
+    if start_date <= note_date <= end_date:
+        save_data(note_data, note_id, keyword)
+    else:
+        logging.info(f'笔记 {note_id} 的发布时间 {note_date} 不在指定范围内')
+
+
+def keyword_search(keyword, start_date, end_date):
     api = '/api/sns/web/v1/search/notes'
 
     search_url = "https://edith.xiaohongshu.com/api/sns/web/v1/search/notes"
@@ -138,26 +165,62 @@ def keyword_search(keyword):
         headers['x-s'], headers['x-t'] = ret['X-s'], str(ret['X-t'])
 
         response = requests.post(search_url, headers=headers, cookies=cookies, data=data.encode('utf-8'))
+
+        if response.status_code != 200:
+            logging.error(f'搜索关键词 {keyword} 第 {page} 页时出错，状态码：{response.status_code}')
+            continue
+
         json_data = response.json()
-        try:
-            notes = json_data['data']['items']
-        except:
-            print('================爬取完毕================')
-            break
+        logging.debug(f'关键词 {keyword} 第 {page} 页的数据：{json_data}')
 
-        for note in notes:
+        if 'data' not in json_data or 'items' not in json_data['data']:
+            logging.error(f'搜索关键词 {keyword} 第 {page} 页时未找到 "items" 字段：{json_data}')
+            continue
+
+        notes_list = json_data['data']['items']
+
+        for note in notes_list:
             note_id = note['id']
-            if len(note_id) != 24:
-                continue
+            get_note_info(note_id, keyword, start_date, end_date)
 
-            get_note_info(note_id, keyword)
+        logging.info('================爬取完毕================')
+
 
 def main():
-    input_keywords = input("请输入要搜索的关键词（多个关键词以逗号分隔）：")
-    keywords = [kw.strip() for kw in input_keywords.split('，')]  # 去掉多余的空格并分割成列表
+    keywords = input("请输入关键词（多个关键词用逗号分隔）：").split(',')
+    keywords = [kw.strip() for kw in keywords if kw.strip()]
 
-    for keyword in keywords:
-        keyword_search(keyword)
+    date_format = "%Y-%m-%d"
+    start_date_str = input("请输入开始日期（格式: YYYY-MM-DD): ")
+    end_date_str = input("请输入结束日期（格式: YYYY-MM-DD): ")
+    start_date = datetime.strptime(start_date_str, date_format)
+    end_date = datetime.strptime(end_date_str, date_format)
+
+    interval = input("请输入间隔时间（格式: Xm 或 Xh，m 代表分钟，h 代表小时）：")
+    unit = interval[-1]
+    value = int(interval[:-1])
+    if unit == 'h':
+        interval_seconds = value * 3600
+    elif unit == 'm':
+        interval_seconds = value * 60
+    else:
+        raise ValueError("间隔时间格式错误，请输入以m或h结尾的时间间隔，例如'30m'或'1h'")
+
+    duration = input("请输入持续时间（格式: Xh，例如'24h'）：")
+    duration_value = int(duration[:-1])
+    duration_seconds = duration_value * 3600
+
+    end_time = datetime.now() + timedelta(seconds=duration_seconds)
+    while datetime.now() < end_time:
+        for keyword in keywords:
+            logging.info(f'开始爬取关键词: {keyword}')
+            keyword_search(keyword, start_date, end_date)
+            logging.info(f'关键词爬取结束: {keyword}')
+        logging.info('======等待下一轮爬取======')
+        time.sleep(interval_seconds)
+
+    logging.info('======小红书笔记收集完毕！======')
+
 
 if __name__ == "__main__":
     main()
