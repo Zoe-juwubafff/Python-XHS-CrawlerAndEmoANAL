@@ -1,0 +1,21 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+
+options = Options()
+options.add_argument("--disable-blink-features=AutomationControlled")
+driver = webdriver.Chrome(options=options)
+driver.get(
+    url=r"https://www.xiaohongshu.com/login?qrId=866341720600847573&ruleId=4&xhs_code=323201&timestamp=1720600847600&channel_type=web&component_id=7720b670c50a7640267ae6ef71b71743")
+
+print('请在25秒内，使用小红书APP扫码登录你的账号...')
+time.sleep(20)
+cookie_list = driver.get_cookies()
+cookies = {}
+for i in cookie_list:
+    key = i['name']
+    value = i['value']
+    cookies[key] = value
+
+with open('cookies.txt', 'w') as f:
+    f.write(str(cookies))
