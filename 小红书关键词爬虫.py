@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import re
 import time
 import requests
@@ -19,21 +20,33 @@ headers = {
     "content-type": "application/json;charset=UTF-8",
     "origin": "https://www.xiaohongshu.com",
     "referer": "https://www.xiaohongshu.com/",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.188"
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 }
+
+# 检查请求头是否包含非latin-1字符
+for header, value in headers.items():
+    try:
+        value.encode('latin-1')
+    except UnicodeEncodeError:
+        print(f'请求头字段 {header} 包含非latin-1字符：{value}')
+
+# 检查请求头是否包含非ASCII字符
+for header, value in headers.items():
+    try:
+        value.encode('ascii')
+    except UnicodeEncodeError:
+        print(f'请求头字段 {header} 包含非ASCII字符：{value}')
 
 # 定义XHS爬虫的cookie，根据XHS-PC端进行设置
 cookies = {
-            'web_session': 'XXXXX',
-            'sec_poison_id': 'XXXXX',
-            'a1': 'XXXXX',
-            'gid': 'XXXXX',
-            'webBuild': 'XXXXX',
-            'xsecappid': 'xhs-pc-web',
-            'websectiga': 'XXXXX',
-            'webId': 'XXXXX',
-            'abRequestId': 'XXXXX',
-            'acw_tc': 'XXXXX'
+    "sec_poison_id": "your sec_poison",
+    "gid": "your gid",
+    "a1": "your a1",
+    "websectiga": "your websectiga",
+    "webId": "your webid",
+    "web_session": "your web_session",
+    "xsecappid": "xhs-pc-web",
+    "webBuild": "your webBuild"
 }
 
 js = execjs.compile(open(r'info.js', 'r', encoding='utf-8').read())
@@ -113,30 +126,23 @@ def get_note_info(note_id, keyword, start_date, end_date):
     ret = js.call('get_xs', '/api/sns/web/v1/feed', data, cookies['a1'])
     headers['x-s'], headers['x-t'] = ret['X-s'], str(ret['X-t'])
     response = requests.post(note_url, headers=headers, cookies=cookies, data=data)
+    if response.status_code == 200:
+        json_data = response.json()
+        try:
+            note_data = json_data['data']['items'][0]
+        except:
+            logging.info(f'笔记 {note_id} 不允许查看')
+            return
 
-    if response.status_code != 200:
-        logging.error(f'获取笔记 {note_id} 的信息时出错，状态码：{response.status_code}')
-        return
+        # 获取笔记发布时间
+        note_time = int(note_data['note_card']['time'] / 1000)
+        note_date = datetime.fromtimestamp(note_time)
 
-    json_data = response.json()
-    logging.debug(f'笔记 {note_id} 的数据：{json_data}')
-
-    try:
-        note_data = json_data['data']['items'][0]
-    except Exception as e:
-        logging.error(f'解析笔记 {note_id} 的数据时出错：{e}')
-        logging.info(f'笔记 {note_id} 不允许查看或无数据')
-        return
-
-    # 获取笔记发布时间
-    note_time = int(note_data['note_card']['time'] / 1000)
-    note_date = datetime.fromtimestamp(note_time)
-
-    # 判断笔记发布时间是否在指定日期范围内
-    if start_date <= note_date <= end_date:
-        save_data(note_data, note_id, keyword)
+        # 判断笔记发布时间是否在指定日期范围内
+        if note_date >= start_date and note_date <= end_date:
+            save_data(note_data, note_id, keyword)
     else:
-        logging.info(f'笔记 {note_id} 的发布时间 {note_date} 不在指定范围内')
+        logging.info(f'获取笔记 {note_id} 的信息时出错，状态码：{response.status_code}')
 
 
 def keyword_search(keyword, start_date, end_date):
@@ -165,62 +171,51 @@ def keyword_search(keyword, start_date, end_date):
         headers['x-s'], headers['x-t'] = ret['X-s'], str(ret['X-t'])
 
         response = requests.post(search_url, headers=headers, cookies=cookies, data=data.encode('utf-8'))
-
-        if response.status_code != 200:
-            logging.error(f'搜索关键词 {keyword} 第 {page} 页时出错，状态码：{response.status_code}')
-            continue
-
-        json_data = response.json()
-        logging.debug(f'关键词 {keyword} 第 {page} 页的数据：{json_data}')
-
-        if 'data' not in json_data or 'items' not in json_data['data']:
-            logging.error(f'搜索关键词 {keyword} 第 {page} 页时未找到 "items" 字段：{json_data}')
-            continue
-
-        notes_list = json_data['data']['items']
-
-        for note in notes_list:
-            note_id = note['id']
-            get_note_info(note_id, keyword, start_date, end_date)
-
-        logging.info('================爬取完毕================')
+        if response.status_code == 200:
+            json_data = response.json()
+            try:
+                notes = json_data['data']['items']
+            except:
+                logging.info(f'搜索关键词 {keyword} 第 {page} 页时未找到 "items" 字段：{json_data}')
+                continue
+            for note in notes:
+                note_id = note['id']
+                get_note_info(note_id, keyword, start_date, end_date)
+        else:
+            logging.info(f'搜索关键词 {keyword} 第 {page} 页时请求失败，状态码：{response.status_code}')
 
 
 def main():
-    keywords = input("请输入关键词（多个关键词用逗号分隔）：").split(',')
-    keywords = [kw.strip() for kw in keywords if kw.strip()]
-
-    date_format = "%Y-%m-%d"
-    start_date_str = input("请输入开始日期（格式: YYYY-MM-DD): ")
-    end_date_str = input("请输入结束日期（格式: YYYY-MM-DD): ")
-    start_date = datetime.strptime(start_date_str, date_format)
-    end_date = datetime.strptime(end_date_str, date_format)
-
+    # 从用户获取输入
+    keywords = input("请输入关键词（多个关键词用逗号分隔）：").split('，')
+    start_date = input("请输入开始日期（格式: YYYY-MM-DD): ")
+    end_date = input("请输入结束日期（格式: YYYY-MM-DD): ")
     interval = input("请输入间隔时间（格式: Xm 或 Xh，m 代表分钟，h 代表小时）：")
-    unit = interval[-1]
-    value = int(interval[:-1])
-    if unit == 'h':
-        interval_seconds = value * 3600
-    elif unit == 'm':
-        interval_seconds = value * 60
-    else:
-        raise ValueError("间隔时间格式错误，请输入以m或h结尾的时间间隔，例如'30m'或'1h'")
-
     duration = input("请输入持续时间（格式: Xh，例如'24h'）：")
-    duration_value = int(duration[:-1])
-    duration_seconds = duration_value * 3600
 
-    end_time = datetime.now() + timedelta(seconds=duration_seconds)
-    while datetime.now() < end_time:
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    # 解析间隔时间和持续时间
+    interval_seconds = int(interval[:-1]) * 60 if interval[-1] == 'm' else int(interval[:-1]) * 3600
+    duration_seconds = int(duration[:-1]) * 3600
+
+    start_time = time.time()
+    elapsed_time = 0
+
+    while elapsed_time < duration_seconds:
         for keyword in keywords:
-            logging.info(f'开始爬取关键词: {keyword}')
+            logging.info(f"开始爬取关键词: {keyword}")
             keyword_search(keyword, start_date, end_date)
-            logging.info(f'关键词爬取结束: {keyword}')
-        logging.info('======等待下一轮爬取======')
+            logging.info(f"关键词爬取结束: {keyword}")
+
+        logging.info("======等待下一轮爬取======")
         time.sleep(interval_seconds)
+        elapsed_time = time.time() - start_time
 
     logging.info('======小红书笔记收集完毕！======')
 
 
 if __name__ == "__main__":
     main()
+    f.close()
