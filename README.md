@@ -31,10 +31,10 @@
 ### 1.一个关键词能爬取多少数据？
 一个关键词只能吧取220条笔记内容，也就是11页，这是小红书的限制(在网页上搜素一个关键词，然后往下翻，就会发现在翻了11页后会触底)。
 ### 2.遇见直接显示爬取完毕的情况，如下图，应该怎么解决？
-![3ad0ccc1c09fdecf6b76170a8be9e77](https://github.com/user-attachments/assets/ecdec8f3-4870-4c06-bd2f-0391856e511e)
+### ![3ad0ccc1c09fdecf6b76170a8be9e77](https://github.com/user-attachments/assets/ecdec8f3-4870-4c06-bd2f-0391856e511e)
 如果遇到这种情况，只能通过更换cookie解决(只用更换一次，成功了就不用换了关键词就更换，等下次再出现这种情况再换)，必须登录xhs账号，并且登录过后重新打开浏览器，再更换cookie
 ### 3.遇见所有笔记都不允许查看，下面图片所示
-![1720859171226](https://github.com/user-attachments/assets/e581a872-9c29-499a-92cc-eb81f11faefa)
+### ![1720859171226](https://github.com/user-attachments/assets/e581a872-9c29-499a-92cc-eb81f11faefa)
 这种情况是因为没有获取正确的cookie。解决方法:用手机验证码重新登录账号，再换cookie，不行的话更换网络，再换cookie，或者更换浏览器，重新登录，再换cookie。
 
 # Contributing
