@@ -163,7 +163,7 @@ def keyword_search(keyword, start_date, end_date):
     data = json.dumps(data, separators=(',', ':'))
     data = re.sub(r'"keyword":".*?"', f'"keyword":"{keyword}"', data)
 
-    page_count = 2  # 爬取的页数, 一页有 20 条笔记 最多只能爬取220条笔记
+    page_count = 20  # 爬取的页数, 一页有 20 条笔记 最多只能爬取220条笔记
     for page in range(1, page_count + 1):
         data = re.sub(r'"page":".*?"', f'"page":"{page}"', data)
 
